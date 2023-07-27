@@ -20,7 +20,7 @@ class PaCSMD:
 
     file_to_pattern = { 'topol': 'topol*.top', 'index': 'index*.ndx', 'input': 'input*.gro', 'md': 'md*.mdp', 'posres': '*.itp', 'sel': 'sel.dat' }
 
-    def __init__(self, work_dir, node, ngpus_per_node, runmode=4, restart: int=0) -> None:
+    def __init__(self, work_dir, node, ngpus_per_node=1, runmode=4, restart: int=0, nbins=30, ntomp=1) -> None:
         self.work_dir = work_dir
         self.log = 'pacs_md.log'
         self.restart = False if restart == 0 else True
