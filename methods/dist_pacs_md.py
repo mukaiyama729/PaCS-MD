@@ -10,7 +10,7 @@ outfn = 'pacs'
 
 class DistPaCSMD(FileManipulator):
 
-    def __init__(self, top_dir, initial_file_paths:dict, initial_files:dict, groups, method:str='dist', com_max_dist:float=7.0, nbins=30, nround=100, ntomp=0, gpuid='0011', runmode=30, gpu=1) -> None:
+    def __init__(self, top_dir, initial_file_paths:dict, initial_files:dict, groups, method:str='dist', com_max_dist:float=7.0, nbins=30, nround=100, ntomp=0, gpuid='0011', runmode=30, parallel=4, gpu=1) -> None:
         logger.info('creating DistPaCSMD object')
         self.top_dir = top_dir
         logger.info('working dir is ' + self.top_dir)
@@ -24,6 +24,7 @@ class DistPaCSMD(FileManipulator):
         self.ntomp = ntomp
         self.gpuid = gpuid
         self.runmode = runmode
+        self.parallel = parallel
         self.gpu = gpu
         self.groups = groups
 
@@ -163,17 +164,17 @@ class DistPaCSMD(FileManipulator):
                         " -ntomp " + str(self.ntomp)
                     )
         else:
-            mdloop = self.nbins // self.runmode
+            mdloop = self.nbins // self.parallel
             logger.info(f'{n}th: mdloop is {mdloop}')
-            if mdloop * self.runmode < self.nbins:
-                lastloop = self.nbins % self.runmode
+            if mdloop * self.parallel < self.nbins:
+                lastloop = self.nbins % self.parallel
                 logger.info(f'{n}th: lastloop is {lastloop}')
             else:
                 lastloop = 0
                 logger.info(f'{n}th: lastloop is {lastloop}')
             for x in range(mdloop):
                 multidir = ""
-                for m in range(x * self.runmode + 1, (x + 1) * self.runmode + 1):
+                for m in range(x * self.parallel + 1, (x + 1) * self.parallel + 1):
                     multidir += self.top_dir_path + 'pacs-{}-{} '.format(n, m)
                 logger.info(f'{n}th: run parallel md for {multidir}')
                 #gpu使うか使わないか
@@ -200,7 +201,7 @@ class DistPaCSMD(FileManipulator):
 
             if lastloop > 0:
                 multidir = ""
-                for m in range(mdloop * self.runmode + 1, self.nbins + 1):
+                for m in range(mdloop * self.parallel + 1, self.nbins + 1):
                     multidir += self.top_dir_path + 'pacs-{}-{} '.format(n, m)
                 logger.info(f'{n}th: run parallel md for {multidir}')
                 if self.gpu:

@@ -9,7 +9,7 @@ class PaCSExecuter(FileManipulator):
         self.base_dir = base_dir
         super().__init__(base_dir)
 
-    def multi_pacs_md(self, how_many, method, node, ngpus_per_node=1, runmode=4, restart: int=0, nbins=30, ntomp=1, groups=(), **kwargs):
+    def multi_pacs_md(self, how_many, method, node, ngpus_per_node=1, runmode=4, restart: int=0, nbins=30, ntomp=1, groups=(), parallel=4, **kwargs):
         if method == 'dist':
             for i in range(1, how_many+1, 1):
                 dir_path = os.path.join(self.base_dir, 'trial{}'.format(i))
@@ -22,7 +22,8 @@ class PaCSExecuter(FileManipulator):
                     runmode,
                     restart,
                     nbins,
-                    ntomp
+                    ntomp,
+                    parallel
                 ).exe_pacs_md('dist', groups, **kwargs)
 
     def single_pacs_md(self, method, node, ngpus_per_node=1, runmode=4, restart: int=0, nbins=30, ntomp=1, groups=(), **kwargs):

@@ -19,6 +19,9 @@ if __name__ == '__main__':
     parser.add_argument('--group1', type=str, help='distPaCSMDなら指定')
     parser.add_argument('--group2', type=str, help='distPaCSMDなら指定')
     parser.add_argument('--how_many', type=int, help='何回pacsmdを繰り返すか')
+    parser.add_argument('--parallel', type=int, help='何並列で行うか default:4')
+    parser.add_argument('--com_max_dist', type=float, help='上限距離')
+    parser.add_argument('--nround', type=int, help='何ラウンドか')
 
     arg = parser.parse_args()
     arranged_args = { k: v for k, v in vars(arg).items() if v is not None }
