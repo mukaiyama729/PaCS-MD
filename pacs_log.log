@@ -41,3 +41,9 @@
 2023-07-05 01:58:39,803 checking file of topol
 2023-07-05 01:58:39,803 []topol*.top
 2023-07-05 01:58:39,803 Any file was not found at ./ directory. Please make topol*.top file.
+2023-07-28 16:12:26,934 {'ngpus_per_node': 4}
+2023-07-28 16:12:26,935 {'ngpus_per_node': 4}
+2023-07-28 16:12:35,933 {'ngpus_per_node': 4}
+2023-07-28 16:12:35,933 {'ngpus_per_node': 4}
+2023-07-28 16:12:43,254 {'ngpus_per_node': 4}
+2023-07-28 16:12:43,254 {'ngpus_per_node': 4}

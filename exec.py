@@ -1,4 +1,4 @@
-from pacs_MD import PaCSMD
+from execute_md import PaCSExecuter
 import sys
 import argparse
 sys.path.append('./')
@@ -18,27 +18,27 @@ if __name__ == '__main__':
     parser.add_argument('--ntomp', type=int, help='スレッド数')
     parser.add_argument('--group1', type=str, help='distPaCSMDなら指定')
     parser.add_argument('--group2', type=str, help='distPaCSMDなら指定')
+    parser.add_argument('--how_many', type=int, help='何回pacsmdを繰り返すか')
 
     arg = parser.parse_args()
     arranged_args = { k: v for k, v in vars(arg).items() if v is not None }
-    print(arranged_args)
-    pacs_md_vars = ['work_dir', 'node', 'ngpus', 'runmode', 'restart']
-    vars_for_exec = ['method', 'ntomp', 'group1', 'group2']
-    pacs_md_dict = { key: arranged_args[key] for key in pacs_md_vars }
-    pacs_md_dict['ngpus_per_node'] = pacs_md_dict.pop('ngpus')
-    vars_md_dict = { key: arranged_args[key] for key in vars_for_exec }
+    if arranged_args['ngpus']:
+        arranged_args['ngpus_per_node'] = arranged_args.pop('ngpus')
+    else:
+        arranged_args.pop('ngpus')
     try:
-        vars_md_dict['groups'] = (vars_md_dict.pop('group1'), vars_md_dict.pop('group2'))
+        arranged_args['groups'] = (arranged_args.pop('group1'), arranged_args.pop('group2'))
     except KeyError:
-        remain = set(['group1', 'group2']) - set(vars_md_dict.keys())
+        remain = set(['group1', 'group2']) - set(arranged_args.keys())
         if len(remain) == 2:
             pass
         else:
             print('groupが一つだけです。')
             raise Exception
-
-    pacs = PaCSMD(**pacs_md_dict)
     logger = logging.getLogger('pacs_md')
-    logger.debug(pacs_md_dict)
-    logger.debug(vars_md_dict)
-    pacs.exe_pacs_md(**vars_md_dict)
+    logger.debug(arranged_args)
+    work_dir = arranged_args.pop('work_dir')
+    PaCSExecuter(work_dir).multi_pacs_md(**arranged_args)
+
+
+
