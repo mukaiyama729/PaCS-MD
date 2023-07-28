@@ -83,7 +83,7 @@ class DistPaCSMD(FileManipulator):
         )
         if self.gpu:
             commnd = (
-                gmxcmd2(2) + "mdrun" +
+                gmxcmd2(self.runmode) + "mdrun" +
                 " -s " + first_file_path + "topol.tpr" +
                 " -o " + first_file_path + "traj.trr" +
                 " -x " + first_file_path + "traj_comp.xtc" +
