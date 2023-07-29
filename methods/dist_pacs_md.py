@@ -91,7 +91,7 @@ class DistPaCSMD(FileManipulator):
                 " -g " + first_file_path + "md.log" +
                 " -c " + first_file_path + "confout.gro" +
                 " -cpo " + first_file_path + "state.cpt" +
-                " -gpu_id " + "0" +
+                " -gpu_id " + "0"
                 " -v -ntomp " + str(self.ntomp)
             )
         else:
