@@ -204,20 +204,25 @@ class DistPaCSMD(FileManipulator):
                     multidir += self.top_dir_path + 'pacs-{}-{} '.format(n, m)
                 logger.info(f'{n}th: run parallel md for {multidir}')
                 if self.gpu:
+                    if lastloop*2 > len(str(self.gpuid)) + 1:
+                        gpu_id = str(self.gpuid)
+                    else:
+                        gpu_id = str(self.gpuid[0:lastloop*2-1])
                     command = (
                         gmxcmd2lastloop(lastloop) + "mdrun" +
                         ' -multidir ' + multidir.rstrip() +
                         ' -s ' + 'topol' +
-                        ' v' +
+                        ' -v' +
                         ' -ntomp ' + str(self.ntomp) +
-                        ' -gpu_id ' + str(self.gpuid[0:lastloop*2-1])
+                        ' -pme ' + 'gpu' + 
+                        ' -gpu_id ' + gpu_id
                     )
                 else:
                     command = (
                         gmxcmd2lastloop(lastloop) + "mdrun" +
                         ' -multidir ' + multidir.rstrip() +
                         ' -s ' + 'topol' +
-                        ' v' +
+                        ' -v' +
                         ' -ntomp ' + str(self.ntomp)
                     )
                 logger.info(f'{n}th: lastloop mdrun command is \n {command}')
