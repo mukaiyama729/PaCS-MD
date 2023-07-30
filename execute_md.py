@@ -13,10 +13,10 @@ class PaCSExecuter(FileManipulator):
         if method == 'dist':
             for i in range(1, how_many+1, 1):
                 dir_path = os.path.join(self.base_dir, 'trial{}'.format(i))
-                self.copy_all_files(self.base_dir, dir_path)
-                #patterns = ['*.top', '*.itp', '*.gro', '*.dat', '*.ndx', '*.mdp']
-                #for pattern in patterns:
-                #self.copy_files(pattern, self.base_dir, dir_path)
+                self.make_dir(dir_path)
+                patterns = ['*.top', '*.itp', '*.gro', '*.dat', '*.ndx', '*.mdp']
+                for pattern in patterns:
+                    self.copy_files(pattern, self.base_dir, dir_path)
                 PaCSMD(
                     dir_path,
                     node,
