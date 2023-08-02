@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--parallel', type=int, help='何並列で行うか default:4')
     parser.add_argument('--com_max_dist', type=float, help='上限距離')
     parser.add_argument('--nround', type=int, help='何ラウンドか')
+    parser.add_argument('--gpu', type=int, help='gpuを使用するか。使用する：１使用しない：０')
 
     arg = parser.parse_args()
     arranged_args = { k: v for k, v in vars(arg).items() if v is not None }

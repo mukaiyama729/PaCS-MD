@@ -104,7 +104,6 @@ class DistPaCSMD(FileManipulator):
                 " -g " + first_file_path + "md.log" +
                 " -c " + first_file_path + "confout.gro" +
                 " -cpo " + first_file_path + "state.cpt" +
-                " -npme " + "1" +
                 " -v -ntomp " + str(self.ntomp)
             )
         os.system(commnd)
