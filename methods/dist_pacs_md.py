@@ -10,7 +10,7 @@ outfn = 'pacs'
 
 class DistPaCSMD(FileManipulator):
 
-    def __init__(self, top_dir, initial_file_paths:dict, initial_files:dict, groups, method:str='dist', com_max_dist:float=7.0, nbins=30, nround=100, ntomp=0, gpuid='0011', runmode=30, gpu=1) -> None:
+    def __init__(self, top_dir, initial_file_paths:dict, initial_files:dict, groups, method:str='dist', com_max_dist:float=7.0, nbins=30, nround=100, ntomp=0, gpuid='0011', runmode=30, parallel=4, gpu=1) -> None:
         logger.info('creating DistPaCSMD object')
         self.top_dir = top_dir
         logger.info('working dir is ' + self.top_dir)
@@ -24,6 +24,7 @@ class DistPaCSMD(FileManipulator):
         self.ntomp = ntomp
         self.gpuid = gpuid
         self.runmode = runmode
+        self.parallel = parallel
         self.gpu = gpu
         self.groups = groups
 
@@ -80,7 +81,31 @@ class DistPaCSMD(FileManipulator):
             " -npme " + "1" +
             " -v -ntomp " + str(self.ntomp)
         )
-        commnd = (gmxcmd2(2) + "mdrun" + " -s " + first_file_path + "topol.tpr" +" -o " + first_file_path + "traj.trr" +" -x " + first_file_path + "traj_comp.xtc" +" -e " + first_file_path + "ener.edr" +" -g " + first_file_path + "md.log" +" -c " + first_file_path + "confout.gro" +" -cpo " + first_file_path + "state.cpt" +" -pme " + "gpu" +" -npme " + "1" +" -v -ntomp " + str(self.ntomp))
+        if self.gpu:
+            commnd = (
+                gmxcmd2(1) + "mdrun" +
+                " -s " + first_file_path + "topol.tpr" +
+                " -o " + first_file_path + "traj.trr" +
+                " -x " + first_file_path + "traj_comp.xtc" +
+                " -e " + first_file_path + "ener.edr" +
+                " -g " + first_file_path + "md.log" +
+                " -c " + first_file_path + "confout.gro" +
+                " -cpo " + first_file_path + "state.cpt" +
+                " -gpu_id " + "0"
+                " -v -ntomp " + str(self.ntomp)
+            )
+        else:
+            commnd = (
+                gmxcmd2(self.runmode) + "mdrun" +
+                " -s " + first_file_path + "topol.tpr" +
+                " -o " + first_file_path + "traj.trr" +
+                " -x " + first_file_path + "traj_comp.xtc" +
+                " -e " + first_file_path + "ener.edr" +
+                " -g " + first_file_path + "md.log" +
+                " -c " + first_file_path + "confout.gro" +
+                " -cpo " + first_file_path + "state.cpt" +
+                " -v -ntomp " + str(self.ntomp)
+            )
         os.system(commnd)
 
         logger.info('comvert trajctory of initial md')
@@ -137,43 +162,70 @@ class DistPaCSMD(FileManipulator):
                         " -ntomp " + str(self.ntomp)
                     )
         else:
-            mdloop = self.nbins // self.runmode
+            mdloop = self.nbins // self.parallel
             logger.info(f'{n}th: mdloop is {mdloop}')
-            if mdloop * self.runmode < self.nbins:
-                lastloop = self.nbins % self.runmode
+            if mdloop * self.parallel < self.nbins:
+                lastloop = self.nbins % self.parallel
                 logger.info(f'{n}th: lastloop is {lastloop}')
             else:
                 lastloop = 0
                 logger.info(f'{n}th: lastloop is {lastloop}')
             for x in range(mdloop):
                 multidir = ""
-                for m in range(x * self.runmode + 1, (x + 1) * self.runmode + 1):
+                for m in range(x * self.parallel + 1, (x + 1) * self.parallel + 1):
                     multidir += self.top_dir_path + 'pacs-{}-{} '.format(n, m)
                 logger.info(f'{n}th: run parallel md for {multidir}')
                 #gpu使うか使わないか
-                os.system(
-                    gmxcmd2(self.runmode) + "mdrun" +
-                    " -multidir " + multidir.rstrip() +
-                    ' -s ' + 'topol' +
-                    ' -v' +
-                    ' -ntomp ' + str(self.ntomp) +
-                    ' -gpu_id ' + str(self.gpuid)
-                )
+                if self.gpu:
+                    command = (
+                        gmxcmd2(self.runmode) + "mdrun" +
+                        " -multidir " + multidir.rstrip() +
+                        ' -s ' + 'topol' +
+                        ' -v' +
+                        ' -ntomp ' + str(self.ntomp) +
+                        ' -gpu_id ' + str(self.gpuid)
+                    )
+                else:
+                    command = (
+                        gmxcmd2(self.runmode) + "mdrun" +
+                        " -multdir " + multidir.rstrip() +
+                        " s " + "topol" +
+                        " -v" +
+                        " -ntomp " + str(self.ntomp)
+                    )
+                logger.info(f'{n}th: mdrun command is \n {command}')
+                os.system(command)
                 logger.info(f'{n}th: finished parallel md for {multidir}')
 
             if lastloop > 0:
                 multidir = ""
-                for m in range(mdloop * self.runmode + 1, self.nbins + 1):
+                for m in range(mdloop * self.parallel + 1, self.nbins + 1):
                     multidir += self.top_dir_path + 'pacs-{}-{} '.format(n, m)
                 logger.info(f'{n}th: run parallel md for {multidir}')
-                os.system(
-                    gmxcmd2lastloop(lastloop) + "mdrun" +
-                    ' -multidir ' + multidir.rstrip() +
-                    ' -s ' + 'topol' +
-                    ' v' +
-                    ' -ntomp ' + str(self.ntomp) +
-                    ' -gpu_id ' + str(self.gpuid[0:lastloop*2-1])
-                )
+                if self.gpu:
+                    if lastloop*2 > len(str(self.gpuid)) + 1:
+                        gpu_id = str(self.gpuid)
+                    else:
+                        gpu_id = str(self.gpuid[0:lastloop*2-1])
+                    command = (
+                        gmxcmd2lastloop(lastloop) + "mdrun" +
+                        ' -multidir ' + multidir.rstrip() +
+                        ' -s ' + 'topol' +
+                        ' -v' +
+                        ' -ntomp ' + str(self.ntomp) +
+                        ' -pme ' + 'gpu' + 
+                        ' -gpu_id ' + gpu_id
+                    )
+                else:
+                    command = (
+                        gmxcmd2lastloop(lastloop) + "mdrun" +
+                        ' -multidir ' + multidir.rstrip() +
+                        ' -s ' + 'topol' +
+                        ' -v' +
+                        ' -ntomp ' + str(self.ntomp)
+                    )
+                logger.info(f'{n}th: lastloop mdrun command is \n {command}')
+                os.system(command)
                 logger.info(f'{n}th: finished parallel md for {multidir}')
 
     def calc_distance(self, n):

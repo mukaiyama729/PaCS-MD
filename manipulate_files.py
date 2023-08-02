@@ -51,6 +51,10 @@ class FileManipulator:
         for file_path in glob.glob(os.path.join(dir1, pattern)):
             shutil.copyfile(file_path, os.path.join(dir2, os.path.basename(file_path)))
 
+    def copy_all_files(self, from_dir, to_dir):
+        logger.info(f'copy all files from {from_dir} to {to_dir}')
+        shutil.copytree(from_dir, to_dir, dirs_exist_ok=True)
+
     def copy_intial_files(self, initial_file_paths, to_dir):
         logger.info(f'copy initial files to {to_dir}')
         shutil.copy(initial_file_paths['topol'], os.path.join(to_dir, os.path.basename(initial_file_paths['topol'])))

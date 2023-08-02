@@ -20,7 +20,7 @@ class PaCSMD:
 
     file_to_pattern = { 'topol': 'topol*.top', 'index': 'index*.ndx', 'input': 'input*.gro', 'md': 'md*.mdp', 'posres': '*.itp', 'sel': 'sel.dat' }
 
-    def __init__(self, work_dir, node, ngpus_per_node, runmode=4, restart: int=0) -> None:
+    def __init__(self, work_dir, node, ngpus_per_node=1, runmode=4, restart: int=0, nbins=30, ntomp=1, parallel=4) -> None:
         self.work_dir = work_dir
         self.log = 'pacs_md.log'
         self.restart = False if restart == 0 else True
@@ -28,6 +28,9 @@ class PaCSMD:
         self.node = node
         self.ngpus_per_node = ngpus_per_node
         self.runmode = runmode
+        self.parallel = parallel
+        self.ntomp = ntomp
+        self.nbins = nbins
 
     def gpu_tasks(self):
         tasks_per_node = self.runmode // self.node
@@ -95,4 +98,4 @@ class PaCSMD:
             if not(groups):
                 logger.error('groups is not specified. please write groups like (ProteinA, ProteinB) which is tuple object')
             else:
-                DistPaCSMD(self.work_dir, self.file_paths, self.files, groups, method, gpuid=self.gpu_id(), runmode=self.runmode, **kwargs).execute_md()
+                DistPaCSMD(self.work_dir, self.file_paths, self.files, groups, method, gpuid=self.gpu_id(), runmode=self.runmode, parallel=self.parallel, ntomp=self.ntomp, nbins=self.nbins, **kwargs).execute_md()

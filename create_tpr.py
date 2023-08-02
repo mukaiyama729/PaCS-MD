@@ -28,8 +28,8 @@ class CreateTprFile:
         logger.info('%sth %s: arrange needed files', n, m)
         os.system(
             "echo 'System' | " + gmxcmd() + "trjconv" +
-            " -f " + self.pick_out_dir(ranked_com_dist, n-1, m) + 'traj_comp.xtc' +
-            " -s " + self.pick_out_dir(ranked_com_dist, n-1, m) + 'topol.tpr' +
+            " -f " + os.path.join(self.top_dir, self.pick_out_dir(ranked_com_dist, n-1, m)) + 'traj_comp.xtc' +
+            " -s " + os.path.join(self.top_dir, self.pick_out_dir(ranked_com_dist, n-1, m)) + 'topol.tpr' +
             " -o " + os.path.join(self.dir, self.initial_files['input']) +
             " -dump " + str(float(ranked_com_dist[-1 * m,0]))
         )

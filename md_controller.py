@@ -1,4 +1,0 @@
-
-class MDController:
-
-    pass
