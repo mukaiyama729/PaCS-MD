@@ -91,7 +91,9 @@ class DistPaCSMD(FileManipulator):
                 " -g " + first_file_path + "md.log" +
                 " -c " + first_file_path + "confout.gro" +
                 " -cpo " + first_file_path + "state.cpt" +
-                " -gpu_id " + "0"
+                " -gpu_id " + "0" +
+                " -nb " + "gpu" + 
+                " -bonded " + "gpu" + 
                 " -v -ntomp " + str(self.ntomp)
             )
         else:
@@ -182,6 +184,11 @@ class DistPaCSMD(FileManipulator):
                         " -multidir " + multidir.rstrip() +
                         ' -s ' + 'topol' +
                         ' -v' +
+                        " -pme " + "gpu" +
+                        " -pmefft " + "gpu" +
+                        " -nb " + "gpu" +
+                        " -bonded " + "gpu" +
+                        " -npme " + "1" +
                         ' -ntomp ' + str(self.ntomp) +
                         ' -gpu_id ' + str(self.gpuid)
                     )
